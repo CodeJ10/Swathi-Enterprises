@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Swathi Enterprises - Green Crackers (Order Sheet)</title>
+  <style>
+    :root{
+      --accent:#2e8b57;
+      --accent2:#f7c948;
+      --muted:#666;
+      --card:#fff;
+      --bg:#fff9f2;
+    }
+    *{box-sizing:border-box;font-family:Arial,system-ui,-apple-system,"Segoe UI",Roboto}
+    body{margin:0;background:linear-gradient(180deg,#fffaf0,#fff);color:#111}
+    header{background:linear-gradient(90deg,var(--accent),#2aa66a);color:white;padding:18px 14px}
+    header h1{margin:0;font-size:20px;letter-spacing:0.3px}
+    header p{margin:6px 0 0;font-size:13px;opacity:.95}
+    .container{max-width:1100px;margin:18px auto;padding:14px}
+    .grid{display:grid;grid-template-columns:1fr 380px;gap:18px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card);padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    .products {max-height:68vh;overflow:auto;padding-right:6px}
+    .category{margin-bottom:14px}
+    .cat-title{background:linear-gradient(90deg,var(--accent2),#ffd27a);padding:8px;border-radius:6px;font-weight:700;color:#333}
+    table{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
+    th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+    th:nth-child(1),td:nth-child(1){width:6%}
+    td.qty-input{width:110px}
+    input[type="number"]{width:80px;padding:6px;border-radius:6px;border:1px solid #ddd}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    button{background:var(--accent);color:white;border:0;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+    button.secondary{background:#444;color:white}
+    .summary{position:sticky;top:18px}
+    .summary h3{margin-top:0}
+    .summary .totals{font-size:16px;margin:8px 0;padding:8px;background:#fbfbfb;border-radius:6px}
+    .small{font-size:13px;color:var(--muted)}
+    footer{max-width:1100px;margin:18px auto;padding:10px 14px;text-align:center;color:var(--muted)}
+    .brand-row{display:flex;align-items:center;gap:12px}
+    .logo{width:54px;height:54px;border-radius:8px;background:linear-gradient(135deg,var(--accent2),#ffb347);display:flex;align-items:center;justify-content:center;font-weight:800;color:#333}
+    .print-note{font-size:13px;color:#333}
+    .empty{padding:18px;border-radius:8px;background:#fff8f0;text-align:center;color:#a33}
+    .total-line{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-weight:700}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div style="min-width:0">
+          <h1>Swathi Enterprises – Green Crackers</h1>
+          <p>We sell only environmental-friendly green crackers • #94/2, 3rd Main, Karavalli Road, K K Halli, Bengaluru – 84</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <div class="card products">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <strong style="font-size:18px">Products</strong>
+          <div class="small">Enter required <strong>number of boxes</strong> for each item</div>
+        </div>
+
+        <!-- Product list will be injected by JS -->
+        <div id="product-list"></div>
+
+      </div>
+
+      <aside class="card summary">
+        <h3>Order Summary</h3>
+        <div class="small">Fill quantities on left, then click "Generate Receipt"</div>
+
+        <div class="totals" id="live-totals">
+          <div class="total-line"><div>Items selected</div><div id="count-items">0</div></div>
+          <div class="total-line"><div>Grand total</div><div id="grand-total">₹0</div></div>
+        </div>
+
+        <div style="margin-top:8px">
+          <div style="display:flex;gap:8px;flex-direction:column">
+            <button id="gen-receipt">Generate Receipt (Print / Save as PDF)</button>
+            <button class="secondary" id="clear-all">Clear All Quantities</button>
+          </div>
+        </div>
+
+        <hr style="margin:12px 0">
+        <div class="small">
+          Tip: After clicking Generate Receipt, a print dialog will open. Choose <strong>Save as PDF</strong> to download the receipt.
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    <div class="brand-row" style="justify-content:center">
+      <div class="logo">SE</div>
+      <div style="text-align:left">
+        <div><strong>Swathi Enterprises</strong></div>
+        <div class="small">Wishing you a Happy and Safe Diwali</div>
+      </div>
+    </div>
+
+    <div style="margin-top:8px" class="small">
+      Phone: +91-XXXXXXXXXX &nbsp; | &nbsp; All items sold at listed rates (best wholesale discounted rates)
+    </div>
+  </footer>
+
+  <script>
+    const products = [
+      { id: 1, category: 'Sparklers', name: '7 CM ELECTRIC / COLOURED', qtyPerBox:'10', rate:40 },
+      { id: 2, category: 'Sparklers', name: '10 CM ELECTRIC / COLOURED / PINK / VOILET/ ORANGE', qtyPerBox:'10', rate:60 },
+      { id: 3, category: 'Sparklers', name: '10 CM DORA MIX 5 IN 1 (MULTI COLOUR)', qtyPerBox:'50', rate:320 },
+      { id: 4, category: 'Sparklers', name: '15 CM ELECTRIC', qtyPerBox:'10', rate:120 },
+      { id: 5, category: 'Sparklers', name: '15 CM COLOURED (CRACKLING)', qtyPerBox:'10', rate:120 },
+      { id: 6, category: 'Sparklers', name: '15 CM RED', qtyPerBox:'10', rate:120 },
+      { id: 7, category: 'Sparklers', name: '15 CM GREEN', qtyPerBox:'10', rate:120 },
+      { id: 8, category: 'Sparklers', name: '15 CM SONA STAR / AMERICAN DIAMOND', qtyPerBox:'10', rate:120 },
+      { id: 9, category: 'Sparklers', name: '30 CM ELECTRIC', qtyPerBox:'5', rate:120 },
+      { id:10, category: 'Sparklers', name: '30 CM COLOURED (CRACKLING)', qtyPerBox:'5', rate:120 },
+      { id:11, category: 'Sparklers', name: '30 CM RED', qtyPerBox:'5', rate:120 },
+      { id:12, category: 'Sparklers', name: '30 CM GREEN', qtyPerBox:'5', rate:120 },
+      { id:13, category: 'Sparklers', name: 'MERRY-GO-ROUND SPARKLERS (ROTATING SPARKLERS)', qtyPerBox:'1', rate:250 },
+      { id:14, category: 'Sparklers', name: '50 CM ELECTRIC', qtyPerBox:'5', rate:300 },
+      { id:15, category: 'Sparklers', name: '75 CM ELECTRIC', qtyPerBox:'5', rate:350 },
+
+      { id:16, category: 'Ground Chakkars / Wheels', name: 'GROUND CHAKKARA BIG (AYYAN FW)', qtyPerBox:'25', rate:250 },
+      { id:17, category: 'Ground Chakkars / Wheels', name: 'GROUND CHAKKARA BIG (DURKESH FW)', qtyPerBox:'10', rate:100 },
+      { id:18, category: 'Ground Chakkars / Wheels', name: 'GROUND CHAKKARA ASHOKA (SRI VIJAY FW / DURKESH FW)', qtyPerBox:'10', rate:120 },
+      { id:19, category: 'Ground Chakkars / Wheels', name: 'GROUND CHAKKARA SPECIAL (SRI VIJAY FW / DURKESH FW)', qtyPerBox:'10', rate:160 },
+      { id:20, category: 'Ground Chakkars / Wheels', name: 'GROUND CHAKKARA ULTRA SPECIAL (AYYAN FW)', qtyPerBox:'10', rate:250 },
+      { id:21, category: 'Ground Chakkars / Wheels', name: 'GROUND CHAKKARA SUPER DELUXE (AYYAN FW)', qtyPerBox:'10', rate:340 },
+      { id:22, category: 'Ground Chakkars / Wheels', name: 'COCKTAIL SPINNER (AYYAN FW)', qtyPerBox:'10', rate:100 },
+      { id:23, category: 'Ground Chakkars / Wheels', name: 'WHISTLING WHEEL (AYYAN FW)', qtyPerBox:'5', rate:260 },
+      { id:24, category: 'Ground Chakkars / Wheels', name: 'LOTUS WHEEL (AYYAN FW)', qtyPerBox:'5', rate:230 },
+      { id:25, category: 'Ground Chakkars / Wheels', name: 'NINJA CHAKKARA (JUMPING CHAKKARA) (AYYAN FW)', qtyPerBox:'2', rate:220 },
+      { id:26, category: 'Ground Chakkars / Wheels', name: 'GAINT WHEEL (AYYAN FW)', qtyPerBox:'5', rate:280 },
+      { id:27, category: 'Ground Chakkars / Wheels', name: 'JOKE WHEEL (AYYAN FW)', qtyPerBox:'5', rate:280 },
+
+      { id:28, category: 'Novelty Fireworks', name: 'TWINKLING STAR 60CM (AYYAN FW)', qtyPerBox:'10', rate:160 },
+      { id:29, category: 'Novelty Fireworks', name: 'PENCIL DELUXE (AYYAN FW)', qtyPerBox:'10', rate:240 },
+      { id:30, category: 'Novelty Fireworks', name: 'NAVRANG PENCEL (SRI VIJAY)', qtyPerBox:'5', rate:230 },
+
+      { id:31, category: 'Flower Pots', name: 'LEMON TREE (AYYAN FW)', qtyPerBox:'1', rate:160 },
+      { id:32, category: 'Flower Pots', name: 'FLOWER POT BIG (AYYAN FW)', qtyPerBox:'10', rate:240 },
+      { id:33, category: 'Flower Pots', name: 'FLOWER POT SPECIAL (AYYAN FW)', qtyPerBox:'10', rate:280 },
+      { id:34, category: 'Flower Pots', name: 'FLOWER POT BIG (DURKESH FW)', qtyPerBox:'10', rate:140 },
+      { id:35, category: 'Flower Pots', name: 'FLOWER POT SPECIAL (DURKESH FW)', qtyPerBox:'10', rate:200 },
+      { id:36, category: 'Flower Pots', name: 'FLOWER POT ASHOKA (DURKESH FW)', qtyPerBox:'10', rate:240 },
+      { id:37, category: 'Flower Pots', name: 'FLOWER POT GAINT (AYYAN FW)', qtyPerBox:'10', rate:550 },
+      { id:38, category: 'Flower Pots', name: 'FLOWER POT DELUXE (AYYAN FW)', qtyPerBox:'2', rate:220 },
+      { id:39, category: 'Flower Pots', name: 'FLOWER POT DELUXE (AYYAN FW)', qtyPerBox:'5', rate:420 },
+      { id:40, category: 'Flower Pots', name: 'VARNAJAL (AYYAN FW)', qtyPerBox:'10', rate:460 },
+      { id:41, category: 'Flower Pots', name: 'TRI COLOUR FOUNTAIN (AYYAN FW)', qtyPerBox:'5', rate:570 },
+      { id:42, category: 'Flower Pots', name: 'COLOUR KOTI DELUXE (AYYAN FW)', qtyPerBox:'10', rate:740 },
+      { id:43, category: 'Flower Pots', name: 'COLOUR KOTI (DURKESH FW)', qtyPerBox:'10', rate:380 },
+      { id:44, category: 'Flower Pots', name: 'PEACOCK INDIGO SURPRISE (AYYAN FW)', qtyPerBox:'1', rate:280 },
+      { id:45, category: 'Flower Pots', name: 'MEGA PEACOCK (AYYAN FW)', qtyPerBox:'1', rate:700 },
+      { id:46, category: 'Flower Pots', name: 'GOLD FEVER (DURKESH FW)', qtyPerBox:'5', rate:220 },
+
+      { id:47, category: 'Rockets', name: 'COLOUR ROCKET (AYYAN FW)', qtyPerBox:'10', rate:230 },
+      { id:48, category: 'Rockets', name: 'BOMB ROCKET (AYYAN FW)', qtyPerBox:'10', rate:230 },
+      { id:49, category: 'Rockets', name: 'LUNIK EXPRESS ROCKET (DURKESH FW)', qtyPerBox:'10', rate:250 },
+      { id:50, category: 'Rockets', name: 'MULTI COLOUR ROCKET (AYYAN FW)', qtyPerBox:'10', rate:300 },
+
+      { id:51, category: 'One Sound Crackers / Bombs', name: 'BIRD CRACKER', qtyPerBox:'5', rate:15 },
+      { id:52, category: 'One Sound Crackers / Bombs', name: "4'' LAKSHMI CRACKER (AYYAN FW / DURKESH FW)", qtyPerBox:'5', rate:50 },
+      { id:53, category: 'One Sound Crackers / Bombs', name: "5'' SAKTHIMAN/DORA (DURKESH FW)", qtyPerBox:'5', rate:60 },
+      { id:54, category: 'One Sound Crackers / Bombs', name: 'GANESH CRACKER (AYYAN FW)', qtyPerBox:'5', rate:60 },
+      { id:55, category: 'One Sound Crackers / Bombs', name: 'DOUBLE SOUND BIG (DURKESH FW)', qtyPerBox:'5', rate:60 },
+      { id:56, category: 'One Sound Crackers / Bombs', name: 'HYDRO BOMB GREEN (DURKESH FW)', qtyPerBox:'10', rate:100 },
+      { id:57, category: 'One Sound Crackers / Bombs', name: 'KING OF KING GREEN (DURKESH FW)', qtyPerBox:'10', rate:170 },
+      { id:58, category: 'One Sound Crackers / Bombs', name: 'TITAN BOMB GREEN (DURKESH FW)', qtyPerBox:'10', rate:280 },
+      { id:59, category: 'One Sound Crackers / Bombs', name: 'STRIPPED BIJILI 50S (DURKESH FW)', qtyPerBox:'50', rate:30 },
+      { id:60, category: 'One Sound Crackers / Bombs', name: 'GOLD BIJILI STRIPPED 100S (DURKESH FW)', qtyPerBox:'100', rate:60 },
+      { id:61, category: 'One Sound Crackers / Bombs', name: 'GOLD BIJILI STRIPPED 100S (SRI VIJAY)', qtyPerBox:'100', rate:60 },
+      { id:62, category: 'One Sound Crackers / Bombs', name: 'STRIPPED BIJILI 100S (AYYAN FW)', qtyPerBox:'100', rate:100 },
+      { id:63, category: 'One Sound Crackers / Bombs', name: 'CRACKLING EXPRESS (100 WALA TYPE WITHOUT PAPERS)', qtyPerBox:'1', rate:80 },
+      { id:64, category: 'One Sound Crackers / Bombs', name: 'CRACKLING LEGEND (200 WALA TYPE WITHOUT PAPERS)', qtyPerBox:'1', rate:160 },
+
+      { id:65, category: 'Fancy Fireworks', name: 'RIDER (DURKESH FW)', qtyPerBox:'5', rate:150 },
+      { id:66, category: 'Fancy Fireworks', name: '7UP (DURKESH FW)', qtyPerBox:'5', rate:180 },
+      { id:67, category: 'Fancy Fireworks', name: 'CANNON FLASH (DURKESH FW)', qtyPerBox:'5', rate:200 },
+      { id:68, category: 'Fancy Fireworks', name: '7 SHOTS RED (AYYAN FW)', qtyPerBox:'5', rate:260 },
+      { id:69, category: 'Fancy Fireworks', name: '7 SHOTS GOLD (AYYAN FW)', qtyPerBox:'5', rate:260 },
+      { id:70, category: 'Fancy Fireworks', name: 'HELICOPTER (AYYAN FW)', qtyPerBox:'5', rate:180 },
+      { id:71, category: 'Fancy Fireworks', name: 'TOP TUCKER (AYYAN FW)', qtyPerBox:'5', rate:180 },
+      { id:72, category: 'Fancy Fireworks', name: 'DRONE (DURKESH FW)', qtyPerBox:'5', rate:200 },
+      { id:73, category: 'Fancy Fireworks', name: 'DANCING BUTTERFLY (DURKESH FW)', qtyPerBox:'10', rate:180 },
+      { id:74, category: 'Fancy Fireworks', name: 'HI-FI SIREN (DURKESH FW)', qtyPerBox:'3', rate:280 },
+      { id:75, category: 'Fancy Fireworks', name: 'EPIC SHOT (DURKESH FW)', qtyPerBox:'5', rate:200 },
+      { id:76, category: 'Fancy Fireworks', name: 'ROMAN CANDLE 6 BALLS (STANDARD FW)', qtyPerBox:'2', rate:250 },
+
+      { id:77, category: 'Comets (Shells)', name: 'POGO SHELL (AYYAN FW)', qtyPerBox:'2', rate:100 },
+      { id:78, category: 'Comets (Shells)', name: 'CHOTA FANCY (DURKESH FW)', qtyPerBox:'1', rate:120 },
+      { id:79, category: 'Comets (Shells)', name: "1.7/5'' SHELL 3D (DURKESH FW) (3PC)", qtyPerBox:'3', rate:500 },
+      { id:80, category: 'Comets (Shells)', name: "2'' SHELL (8 VARITES) (AYYAN FW)", qtyPerBox:'1', rate:300 },
+      { id:81, category: 'Comets (Shells)', name: "2.5'' SHELL (DURKESH FW)", qtyPerBox:'1', rate:300 },
+      { id:82, category: 'Comets (Shells)', name: "3.5'' SHELL (DURKESH FW)", qtyPerBox:'1', rate:500 },
+      { id:83, category: 'Comets (Shells)', name: "3'' SHELL PREMIUM (AYYAN FW)", qtyPerBox:'1', rate:600 },
+
+      { id:84, category: 'Repeating Multi Colour Sky Shots', name: '12 SHOTS', qtyPerBox:'1', rate:0 },
+      { id:85, category: 'Repeating Multi Colour Sky Shots', name: '15 SHOTS', qtyPerBox:'1', rate:500 },
+      { id:86, category: 'Repeating Multi Colour Sky Shots', name: 'INDIAN DELIGHT 15 SHOTS (AYYAN FW)', qtyPerBox:'1', rate:600 },
+      { id:87, category: 'Repeating Multi Colour Sky Shots', name: 'MASH UP 30 SHOTS (DURKESH FW)', qtyPerBox:'1', rate:900 },
+      { id:88, category: 'Repeating Multi Colour Sky Shots', name: 'INDIAN DELIGHT 30 SHOTS (AYYAN FW)', qtyPerBox:'1', rate:1100 },
+      { id:89, category: 'Repeating Multi Colour Sky Shots', name: 'MARLO 60 SHOTS (DURKESH FW)', qtyPerBox:'1', rate:1700 },
+      { id:90, category: 'Repeating Multi Colour Sky Shots', name: 'WONDER NIGHT 60 SHOTS (AYYAN FW)', qtyPerBox:'1', rate:1800 },
+      { id:91, category: 'Repeating Multi Colour Sky Shots', name: 'JOLLY 120 SHOTS (DURKESH FW)', qtyPerBox:'1', rate:2500 },
+      { id:92, category: 'Repeating Multi Colour Sky Shots', name: 'ARABIAN DELIGHT 120 SHOTS (AYYAN FW)', qtyPerBox:'1', rate:2800 },
+      { id:93, category: 'Repeating Multi Colour Sky Shots', name: 'BOING 240 SHOTS (DURKESH FW)', qtyPerBox:'1', rate:5000 },
+
+      { id:94, category: 'Gift Boxes', name: 'KIDS GIFT 18 ITEMS', qtyPerBox:'1', rate:600 },
+      { id:95, category: 'Gift Boxes', name: 'DISNEY JUNIOR 27 ITEMS', qtyPerBox:'1', rate:750 },
+      { id:96, category: 'Gift Boxes', name: 'WONDER GIFT 30 ITEMS', qtyPerBox:'1', rate:950 },
+      { id:97, category: 'Gift Boxes', name: 'JUNGLE BEAT 36 ITEMS', qtyPerBox:'1', rate:1100 },
+      { id:98, category: 'Gift Boxes', name: 'MADHURA GIFT 40 ITEMS', qtyPerBox:'1', rate:1300 },
+      { id:99, category: 'Gift Boxes', name: 'WINNER GIFT 51 ITEMS', qtyPerBox:'1', rate:1700 }
+    ];
+
+    const productListEl = document.getElementById('product-list');
+    const countItemsEl = document.getElementById('count-items');
+    const grandTotalEl = document.getElementById('grand-total');
+
+    function groupByCategory(list) {
+      const map = {};
+      list.forEach(p=>{
+        if(!map[p.category]) map[p.category] = [];
+        map[p.category].push(p);
+      });
+      return map;
+    }
+
+    function renderProducts() {
+      const grouped = groupByCategory(products);
+      let html = '';
+      for(const cat of Object.keys(grouped)) {
+        html += `<div class="category"><div class="cat-title">${cat}</div>`;
+        html += `<table><thead><tr><th>#</th><th>Product</th><th>Qty/box</th><th>Rate (₹)</th><th>Boxes required</th></tr></thead><tbody>`;
+        grouped[cat].forEach(p=>{
+          const id = 'q_'+p.id;
+          html += `<tr>
+            <td>${p.id}</td>
+            <td>${escapeHtml(p.name)}</td>
+            <td>${p.qtyPerBox}</td>
+            <td>${p.rate>0?('₹'+p.rate): '-'}</td>
+            <td class="qty-input"><input type="number" min="0" step="1" value="0" id="${id}" data-id="${p.id}" /></td>
+          </tr>`;
+        });
+        html += `</tbody></table></div>`;
+      }
+      productListEl.innerHTML = html;
+
+      document.querySelectorAll('input[type="number"]').forEach(inp=>{
+        inp.addEventListener('input', updateLiveTotals);
+      });
+    }
+
+    function escapeHtml(s){return (s+'').replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});}
+
+    function updateLiveTotals() {
+      let countItems = 0;
+      let grand = 0;
+      products.forEach(p=>{
+        const qEl = document.getElementById('q_'+p.id);
+        const qtyBoxes = Math.max(0,parseInt(qEl?.value||0)||0);
+        if(qtyBoxes>0) countItems += qtyBoxes;
+        grand += qtyBoxes * (p.rate||0);
+      });
+      countItemsEl.textContent = countItems;
+      grandTotalEl.textContent = '₹' + numberWithCommas(grand);
+    }
+
+    function numberWithCommas(x){ return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+
+    function collectOrder() {
+      const items = [];
+      let grand = 0;
+      products.forEach(p=>{
+        const q = Math.max(0, parseInt(document.getElementById('q_'+p.id).value || 0) || 0);
+        if(q>0) {
+          const subtotal = q * (p.rate||0);
+          items.push({...p, boxes: q, subtotal});
+          grand += subtotal;
+        }
+      });
+      return {items, grand};
+    }
+
+    function generateReceipt() {
+      const {items, grand} = collectOrder();
+      if(items.length===0){ alert('No items selected. Please enter required boxes for items.'); return; }
+
+      const company = {
+        name: "Swathi Enterprises",
+        address: " #94/2, 3rd Main, Karavalli Road, K K Halli, Bengaluru – 84",
+        phone: "+91-XXXXXXXXXX",
+        note: "Wishing You a Happy and Safe Diwali",
+        footerNote: "All items sold at listed rates. Prices include best wholesale discounts."
+      };
+
+      const now = new Date();
+      const dateStr = now.toLocaleString();
+
+      let receiptHtml = `
+        <html><head><title>Receipt - ${company.name}</title>
+        <style>
+          body{font-family:Arial; padding:18px; color:#111}
+          .head{display:flex;justify-content:space-between;align-items:center}
+          .company{font-size:18px;font-weight:700}
+          .muted{color:#555;font-size:13px}
+          table{width:100%;border-collapse:collapse;margin-top:12px}
+          th,td{border:1px solid #ddd;padding:8px;text-align:left;font-size:13px}
+          th{background:#f7f7f7}
+          .right{text-align:right}
+          .total{font-weight:800;font-size:16px}
+          .small{font-size:12px;color:#444}
+        </style>
+        </head><body>
+        <div class="head">
+          <div>
+            <div class="company">${company.name}</div>
+            <div class="muted">${company.address}</div>
+            <div class="muted">Phone: ${company.phone}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="small">Receipt Date: ${escapeHtml(dateStr)}</div>
+            <div class="small">Order ID: ${Date.now()}</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:18px">Order Receipt</h3>
+
+        <table>
+          <thead>
+            <tr><th>#</th><th>Product</th><th>Qty/box</th><th>Rate (₹)</th><th>Boxes</th><th>Subtotal (₹)</th></tr>
+          </thead>
+          <tbody>
+      `;
+
+      items.forEach((it, idx) => {
+        receiptHtml += `<tr>
+          <td>${idx+1}</td>
+          <td>${escapeHtml(it.name)}</td>
+          <td>${escapeHtml(it.qtyPerBox)}</td>
+          <td class="right">${it.rate>0?('₹'+numberWithCommas(it.rate)):'-'}</td>
+          <td class="right">${it.boxes}</td>
+          <td class="right">₹${numberWithCommas(it.subtotal)}</td>
+        </tr>`;
+      });
+
+      receiptHtml += `
+          </tbody>
+        </table>
+
+        <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+          <div class="small">${company.footerNote}</div>
+          <div style="text-align:right">
+            <div class="total">Grand Total: ₹${numberWithCommas(grand)}</div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px" class="small">Customer signature: ______________________</div>
+
+        <div style="margin-top:18px;font-size:13px;color:#333">${company.note}</div>
+
+        </body></html>
+      `;
+
+      const receiptWindow = window.open('', '_blank', 'width=900,height=700');
+      receiptWindow.document.write(receiptHtml);
+      receiptWindow.document.close();
+      setTimeout(()=>{ receiptWindow.focus(); receiptWindow.print(); }, 400);
+    }
+
+    function clearAll() {
+      if(!confirm('Clear all entered quantities?')) return;
+      document.querySelectorAll('input[type="number"]').forEach(i=>i.value='0');
+      updateLiveTotals();
+    }
+
+    // initial render
+    renderProducts();
+    updateLiveTotals();
+
+    document.getElementById('gen-receipt').addEventListener('click', generateReceipt);
+    document.getElementById('clear-all').addEventListener('click', clearAll);
+
+  </script>
+</body>
+</html>
